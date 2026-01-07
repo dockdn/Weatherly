@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weatherly Weather</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <!-- SVG FAVICON USING EMOJI -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
+</head>
+
+<body>
+  <div class="page">
+
+    <!-- HEADER SECTION -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-bubble">☀️</div>
+        <div>
+          <h1>Weatherly Search</h1>
+          <p class="sub">A Little Sunshine in Every Forecast 🌤️</p>
+        </div>
+      </div>
+
+      <!-- LIGHT AND DARK MODE TOGGLE (04 - JAVASCRIPT) -->
+      <div class="mode-wrap">
+        <label class="switch">
+          <input type="checkbox" id="toggleButton" />
+          <span class="slider"></span>
+        </label>
+
+        <span id="toggleLabel" class="mode-label">Light Mode</span>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT CARD -->
+    <main class="card">
+
+      <!-- SEARCH FORM (07-EXPRESSJS.SERVER) -->
+
+      <form class="form" action="/search" method="GET">
+
+        <label class="label">City (required)</label>
+        <input
+          class="input"
+          type="text"
+          name="city"
+          placeholder="e.g., Farmingdale"
+          value="<%= form.city %>"
+          required
+        />
+
+        <div class="grid">
+          <div>
+            <label class="label">Units</label>
+            <!-- FORM.UNITS LOGIC WIRED IN SERVER.JS -->
+            <select class="select" name="units">
+              <option value="metric" <%= form.units === "metric" ? "selected" : "" %>>
+                Celsius (°C)
+              </option>
+              <option value="imperial" <%= form.units === "imperial" ? "selected" : "" %>>
+                Fahrenheit (°F)
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label">Language</label>
+            <!-- FORM.LANG LOGIC WIRED IN SERVER.JS -->
+            <select class="select" name="lang">
+              <option value="en" <%= form.lang === "en" ? "selected" : "" %>>English</option>
+              <option value="es" <%= form.lang === "es" ? "selected" : "" %>>Spanish</option>
+            </select>
+          </div>
+
+          <div class="span2">
+            <label class="label">Forecast Type</label>
+            <div class="seg">
+
+              <label class="seg-item">
+                <input
+                  type="radio"
+                  name="type"
+                  value="today"
+                  <%= form.type === "today" ? "checked" : "" %>
+                />
+                <span>Today</span>
+              </label>
+
+              <label class="seg-item">
+                <input
+                  type="radio"
+                  name="type"
+                  value="5day"
+                  <%= form.type === "5day" ? "checked" : "" %>
+                />
+                <span>5 Day</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn" type="submit">Search Weather ✨</button>
+
+        <!-- CONDITIONAL ERROR DISPLAY (EJS CONTROL FLOW FROM 07-EXPRESSJS.SERVER) -->
+
+        <% if (error) { %>
+          <div class="alert">⚠️ <%= error %></div>
+        <% } %>
+
+      </form>
+
+      <!-- TODAY WEATHER RESULT WITH CONDITIONAL ERROR HANDLING -->
+      <% if (result && !forecast) { %>
+        <section class="results">
+          <h2 class="title">
+            Weather for <span class="highlight"><%= result.city %></span>
+          </h2>
+
+        <!-- INDIVIDUAL WEATHER RESULT CARD -->
+          <div class="result-card">
+            <div class="left">
+              <div class="temp">
+                <%= result.temp %><span><%= result.units %></span>
+              </div>
+              <div class="condition"><%= result.condition %></div>
+              <div class="mini">
+                Feels like: <b><%= result.feels %><%= result.units %></b>
+              </div>
+              <div class="mini">
+                Humidity: <b><%= result.humidity %>%</b>
+              </div>
+              <div class="mini">
+                Wind: <b><%= result.wind %> <%= result.windUnits %></b>
+              </div>
+            </div>
+
+            <div class="right">
+              <!-- WEATHER ICON (FROM WEATHERAPI) -->
+              <% if (result.iconUrl) { %>
+                <img class="icon" src="<%= result.iconUrl %>" alt="weather icon" />
+              <% } else { %>
+                <div class="icon-fallback">🌤️</div>
+              <% } %>
+            </div>
+          </div>
+        </section>
+      <% } %>
+
+      <!-- 5 DAY FORECAST -->
+      <% if (result && forecast) { %>
+        <section class="results">
+          <h2 class="title">
+            5 Day Forecast for <span class="highlight"><%= result.city %></span>
+          </h2>
+
+          <div class="forecast">
+            <% forecast.forEach(day => { %>
+              <div class="day">
+                <div class="day-top">
+                  <div class="date"><%= day.date %></div>
+                  <% if (day.iconUrl) { %>
+                    <img class="icon-sm" src="<%= day.iconUrl %>" alt="forecast icon" />
+                  <% } %>
+                </div>
+
+                <div class="day-temp">
+                  <%= day.temp %><span><%= result.units %></span>
+                </div>
+
+                <div class="mini"><%= day.condition %></div>
+                <div class="mini">
+                  Humidity: <b><%= day.humidity %>%</b>
+                </div>
+                <div class="mini">
+                  Wind: <b><%= day.wind %> <%= result.windUnits %></b>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>☀️ OpenWeather Search App </span>
+    </footer>
+
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
